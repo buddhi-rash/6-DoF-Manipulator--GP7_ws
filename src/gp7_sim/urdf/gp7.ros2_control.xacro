@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<!-- ros2_control hardware description + Gazebo (gz-sim) plugin that starts the controller_manager -->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:macro name="gp7_joint_if" params="name">
+    <joint name="${name}">
+      <command_interface name="position"/>
+      <state_interface name="position">
+        <param name="initial_value">0.0</param>
+      </state_interface>
+      <state_interface name="velocity"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:macro name="gp7_ros2_control" params="prefix controllers_file">
+
+    <ros2_control name="GazeboSimSystem" type="system">
+      <hardware>
+        <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+      </hardware>
+      <xacro:gp7_joint_if name="${prefix}joint_1_s"/>
+      <xacro:gp7_joint_if name="${prefix}joint_2_l"/>
+      <xacro:gp7_joint_if name="${prefix}joint_3_u"/>
+      <xacro:gp7_joint_if name="${prefix}joint_4_r"/>
+      <xacro:gp7_joint_if name="${prefix}joint_5_b"/>
+      <xacro:gp7_joint_if name="${prefix}joint_6_t"/>
+      <xacro:gp7_joint_if name="finger_left_joint"/>
+      <xacro:gp7_joint_if name="finger_right_joint"/>
+    </ros2_control>
+
+    <gazebo>
+      <plugin filename="libgz_ros2_control-system.so" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+        <parameters>${controllers_file}</parameters>
+      </plugin>
+    </gazebo>
+
+  </xacro:macro>
+</robot>

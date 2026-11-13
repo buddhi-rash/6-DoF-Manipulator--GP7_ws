@@ -1,0 +1,55 @@
+[0.023s] Invoking command in '/home/buddhi-rashmika/gp7_ws/build/gp7_sim': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/lyrical DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake /home/buddhi-rashmika/gp7_ws/src/gp7_sim -DCMAKE_INSTALL_PREFIX=/home/buddhi-rashmika/gp7_ws/install/gp7_sim
+[0.053s] -- Found ament_cmake: 2.8.8 (/opt/ros/lyrical/share/ament_cmake/cmake)
+[0.377s] -- Override CMake install command with custom implementation using symlinks instead of copying resources
+[0.543s] -- Configuring done (0.5s)
+[0.551s] -- Generating done (0.0s)
+[0.554s] -- Build files have been written to: /home/buddhi-rashmika/gp7_ws/build/gp7_sim
+[0.559s] Invoked command in '/home/buddhi-rashmika/gp7_ws/build/gp7_sim' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/lyrical DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake /home/buddhi-rashmika/gp7_ws/src/gp7_sim -DCMAKE_INSTALL_PREFIX=/home/buddhi-rashmika/gp7_ws/install/gp7_sim
+[0.561s] Invoking command in '/home/buddhi-rashmika/gp7_ws/build/gp7_sim': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/lyrical DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --build /home/buddhi-rashmika/gp7_ws/build/gp7_sim -- -j16 -l16
+[0.646s] Invoked command in '/home/buddhi-rashmika/gp7_ws/build/gp7_sim' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/lyrical DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --build /home/buddhi-rashmika/gp7_ws/build/gp7_sim -- -j16 -l16
+[0.664s] Invoking command in '/home/buddhi-rashmika/gp7_ws/build/gp7_sim': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/lyrical DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --install /home/buddhi-rashmika/gp7_ws/build/gp7_sim
+[0.679s] -- Install configuration: ""
+[0.679s] -- Execute custom install script
+[0.680s] -- Up-to-date symlink: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/gp7_sim/launch/sim.launch.py
+[0.680s] -- Up-to-date symlink: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/gp7_sim/launch/view_gp7.launch.py
+[0.681s] -- Up-to-date symlink: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/gp7_sim/urdf/gp7.ros2_control.xacro
+[0.681s] -- Up-to-date symlink: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/gp7_sim/urdf/gp7.urdf.xacro
+[0.681s] -- Up-to-date symlink: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/gp7_sim/urdf/gp7_gripper.xacro
+[0.681s] -- Up-to-date symlink: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/gp7_sim/urdf/gp7_macro.xacro
+[0.682s] -- Up-to-date symlink: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/gp7_sim/meshes/collision/gp7_base_link.stl
+[0.682s] -- Up-to-date symlink: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/gp7_sim/meshes/collision/gp7_link_1_s.stl
+[0.682s] -- Up-to-date symlink: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/gp7_sim/meshes/collision/gp7_link_2_l.stl
+[0.682s] -- Up-to-date symlink: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/gp7_sim/meshes/collision/gp7_link_3_u.stl
+[0.683s] -- Up-to-date symlink: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/gp7_sim/meshes/collision/gp7_link_4_r.stl
+[0.683s] -- Up-to-date symlink: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/gp7_sim/meshes/collision/gp7_link_5_b.stl
+[0.683s] -- Up-to-date symlink: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/gp7_sim/meshes/collision/gp7_link_6_t.stl
+[0.683s] -- Up-to-date symlink: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/gp7_sim/meshes/visual/gp7_base_link.stl
+[0.683s] -- Up-to-date symlink: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/gp7_sim/meshes/visual/gp7_link_1_s.stl
+[0.683s] -- Up-to-date symlink: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/gp7_sim/meshes/visual/gp7_link_2_l.stl
+[0.683s] -- Up-to-date symlink: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/gp7_sim/meshes/visual/gp7_link_3_u.stl
+[0.684s] -- Up-to-date symlink: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/gp7_sim/meshes/visual/gp7_link_4_r.stl
+[0.684s] -- Up-to-date symlink: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/gp7_sim/meshes/visual/gp7_link_5_b.stl
+[0.684s] -- Up-to-date symlink: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/gp7_sim/meshes/visual/gp7_link_6_t.stl
+[0.684s] -- Up-to-date symlink: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/gp7_sim/config/gp7_controllers.yaml
+[0.684s] -- Up-to-date symlink: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/gp7_sim/worlds/pick_place.sdf
+[0.685s] -- Up-to-date symlink: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/gp7_sim/models/box_a.sdf
+[0.685s] -- Up-to-date symlink: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/gp7_sim/models/box_b.sdf
+[0.685s] -- Up-to-date symlink: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/gp7_sim/rviz/view_gp7.rviz
+[0.685s] -- Up-to-date symlink: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/lib/gp7_sim/move_test.py
+[0.686s] -- Up-to-date symlink: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/ament_index/resource_index/package_run_dependencies/gp7_sim
+[0.686s] -- Up-to-date symlink: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/ament_index/resource_index/parent_prefix_path/gp7_sim
+[0.687s] -- Up-to-date symlink: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/gp7_sim/environment/ament_prefix_path.sh
+[0.687s] -- Up-to-date symlink: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/gp7_sim/environment/ament_prefix_path.dsv
+[0.687s] -- Up-to-date symlink: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/gp7_sim/environment/path.sh
+[0.687s] -- Up-to-date symlink: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/gp7_sim/environment/path.dsv
+[0.688s] -- Up-to-date symlink: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/gp7_sim/local_setup.bash
+[0.688s] -- Up-to-date symlink: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/gp7_sim/local_setup.fish
+[0.688s] -- Up-to-date symlink: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/gp7_sim/local_setup.sh
+[0.688s] -- Up-to-date symlink: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/gp7_sim/local_setup.zsh
+[0.689s] -- Up-to-date symlink: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/gp7_sim/local_setup.dsv
+[0.689s] -- Symlinking: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/gp7_sim/package.dsv
+[0.711s] -- Up-to-date symlink: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/ament_index/resource_index/packages/gp7_sim
+[0.711s] -- Up-to-date symlink: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/gp7_sim/cmake/gp7_simConfig.cmake
+[0.711s] -- Up-to-date symlink: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/gp7_sim/cmake/gp7_simConfig-version.cmake
+[0.712s] -- Up-to-date symlink: /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/gp7_sim/package.xml
+[0.716s] Invoked command in '/home/buddhi-rashmika/gp7_ws/build/gp7_sim' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/lyrical DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --install /home/buddhi-rashmika/gp7_ws/build/gp7_sim

@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!-- Top-level description: world link + GP7 arm + simple 2-finger gripper + ros2_control -->
+<robot name="motoman_gp7" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- YAML with the controller_manager / controller settings (loaded by the Gazebo plugin) -->
+  <xacro:arg name="controllers_file" default="$(find gp7_sim)/config/gp7_controllers.yaml"/>
+
+  <xacro:include filename="$(find gp7_sim)/urdf/gp7_macro.xacro"/>
+  <xacro:include filename="$(find gp7_sim)/urdf/gp7_gripper.xacro"/>
+  <xacro:include filename="$(find gp7_sim)/urdf/gp7.ros2_control.xacro"/>
+
+  <link name="world"/>
+
+  <xacro:motoman_gp7 prefix="" parent="world"/>
+  <xacro:gp7_gripper parent="flange"/>
+  <xacro:gp7_ros2_control prefix="" controllers_file="$(arg controllers_file)"/>
+
+</robot>

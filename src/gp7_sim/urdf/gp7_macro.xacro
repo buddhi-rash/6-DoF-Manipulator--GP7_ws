@@ -1,0 +1,150 @@
+<?xml version="1.0"?>
+<!--
+  Yaskawa GP7 arm, ROS 2 Lyrical + Gazebo Jetty (gz-sim) version.
+
+  Differences from the ROS-1 / Gazebo-Classic original:
+    * xacro namespace is http://www.ros.org/wiki/xacro (the documented one)
+    * <gazebo><material>Gazebo/Blue</material></gazebo> (Gazebo-Classic material scripts) removed;
+      the URDF <material> colour is used instead
+    * a fixed "world" parent joint is added, so the base does not fall over in the simulator
+    * placeholder inertials (all at the link origin) replaced by values computed from the
+      collision meshes (centre of mass + inertia tensor, assumed link masses)
+    * ros2_control + gripper live in their own files (gp7.ros2_control.xacro, gp7_gripper.xacro)
+
+  Joint axes, origins and limits are unchanged from the ROS-Industrial motoman_gp7 description.
+-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <material name="yaskawa_blue">
+    <color rgba="0.12941 0.14902 0.74902 1.0"/>
+  </material>
+
+  <!-- one link: visual STL + collision STL + inertial (cog is expressed in the link frame) -->
+  <xacro:macro name="gp7_link" params="prefix name mass cog ixx iyy izz ixy ixz iyz">
+    <link name="${prefix}${name}">
+      <visual>
+        <geometry><mesh filename="package://gp7_sim/meshes/visual/gp7_${name}.stl"/></geometry>
+        <material name="yaskawa_blue"/>
+      </visual>
+      <collision>
+        <geometry><mesh filename="package://gp7_sim/meshes/collision/gp7_${name}.stl"/></geometry>
+      </collision>
+      <inertial>
+        <origin xyz="${cog}" rpy="0 0 0"/>
+        <mass value="${mass}"/>
+        <inertia ixx="${ixx}" ixy="${ixy}" ixz="${ixz}" iyy="${iyy}" iyz="${iyz}" izz="${izz}"/>
+      </inertial>
+    </link>
+  </xacro:macro>
+
+  <xacro:macro name="motoman_gp7" params="prefix parent">
+
+    <!-- anchor the robot to the world (arm at 0,0,0 as required by the task sheet) -->
+    <joint name="${prefix}world_to_base" type="fixed">
+      <parent link="${parent}"/>
+      <child link="${prefix}base_link"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
+
+    <!-- link list -->
+    <xacro:gp7_link prefix="${prefix}" name="base_link" mass="5.0"
+        cog="-0.010433 -0.000063 0.090032"
+        ixx="0.027666" iyy="0.031864" izz="0.028721"
+        ixy="0.000004" ixz="0.000048" iyz="-0.000014"/>
+    <xacro:gp7_link prefix="${prefix}" name="link_1_s" mass="7.0"
+        cog="0.017718 0.000130 -0.047318"
+        ixx="0.030361" iyy="0.032638" izz="0.026101"
+        ixy="0.000041" ixz="-0.003580" iyz="-0.000044"/>
+    <xacro:gp7_link prefix="${prefix}" name="link_2_l" mass="9.0"
+        cog="-0.027412 0.000232 0.195560"
+        ixx="0.209649" iyy="0.162888" izz="0.064317"
+        ixy="-0.000051" ixz="-0.000450" iyz="-0.000654"/>
+    <xacro:gp7_link prefix="${prefix}" name="link_3_u" mass="6.0"
+        cog="-0.016069 -0.001162 0.020960"
+        ixx="0.018752" iyy="0.022280" izz="0.020988"
+        ixy="0.000163" ixz="-0.001577" iyz="-0.000042"/>
+    <xacro:gp7_link prefix="${prefix}" name="link_4_r" mass="3.5"
+        cog="-0.172062 -0.000019 0.000132"
+        ixx="0.005449" iyy="0.043950" izz="0.044452"
+        ixy="-0.000009" ixz="0.000043" iyz="0.000007"/>
+    <xacro:gp7_link prefix="${prefix}" name="link_5_b" mass="1.5"
+        cog="0.021162 0.000070 -0.000180"
+        ixx="0.001053" iyy="0.001969" izz="0.001871"
+        ixy="0.000000" ixz="-0.000001" iyz="0.000004"/>
+    <xacro:gp7_link prefix="${prefix}" name="link_6_t" mass="0.5"
+        cog="0.074213 -0.000001 -0.000016"
+        ixx="0.000195" iyy="0.000104" izz="0.000104"
+        ixy="0.000000" ixz="0.000000" iyz="0.000000"/>
+    <!-- end of link list -->
+
+    <!-- joint list -->
+    <joint name="${prefix}joint_1_s" type="revolute">
+      <parent link="${prefix}base_link"/>
+      <child link="${prefix}link_1_s"/>
+      <origin xyz="0 0 0.330" rpy="0 0 0"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="${radians(-170)}" upper="${radians(170)}" effort="212.66" velocity="${radians(375)}"/>
+    </joint>
+    <joint name="${prefix}joint_2_l" type="revolute">
+      <parent link="${prefix}link_1_s"/>
+      <child link="${prefix}link_2_l"/>
+      <origin xyz="0.040 0 0" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+      <limit lower="${radians(-65)}" upper="${radians(145)}" effort="205.80" velocity="${radians(315)}"/>
+    </joint>
+    <joint name="${prefix}joint_3_u" type="revolute">
+      <parent link="${prefix}link_2_l"/>
+      <child link="${prefix}link_3_u"/>
+      <origin xyz="0 0 0.445" rpy="0 0 0"/>
+      <axis xyz="0 -1 0"/>
+      <limit lower="${radians(-70)}" upper="${radians(190)}" effort="106.82" velocity="${radians(410)}"/>
+    </joint>
+    <joint name="${prefix}joint_4_r" type="revolute">
+      <parent link="${prefix}link_3_u"/>
+      <child link="${prefix}link_4_r"/>
+      <origin xyz="0.440 0 0.040" rpy="0 0 0"/>
+      <axis xyz="-1 0 0"/>
+      <limit lower="${radians(-190)}" upper="${radians(190)}" effort="55.86" velocity="${radians(550)}"/>
+    </joint>
+    <joint name="${prefix}joint_5_b" type="revolute">
+      <parent link="${prefix}link_4_r"/>
+      <child link="${prefix}link_5_b"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <axis xyz="0 -1 0"/>
+      <limit lower="${radians(-135)}" upper="${radians(135)}" effort="32.68" velocity="${radians(550)}"/>
+    </joint>
+    <joint name="${prefix}joint_6_t" type="revolute">
+      <parent link="${prefix}link_5_b"/>
+      <child link="${prefix}link_6_t"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <axis xyz="-1 0 0"/>
+      <limit lower="${radians(-360)}" upper="${radians(360)}" effort="22.54" velocity="${radians(1000)}"/>
+    </joint>
+    <!-- end of joint list -->
+
+    <!-- ROS-Industrial 'flange' frame: the gripper is attached here (tool axis = +X of this frame) -->
+    <link name="${prefix}flange"/>
+    <joint name="${prefix}joint_6_t-flange" type="fixed">
+      <origin xyz="0.080 0 0" rpy="0 0 0"/>
+      <parent link="${prefix}link_6_t"/>
+      <child link="${prefix}flange"/>
+    </joint>
+
+    <!-- ROS-Industrial 'tool0' frame -->
+    <link name="${prefix}tool0"/>
+    <joint name="${prefix}flange-tool0" type="fixed">
+      <origin xyz="0 0 0" rpy="${radians(180)} ${radians(-90)} 0"/>
+      <parent link="${prefix}flange"/>
+      <child link="${prefix}tool0"/>
+    </joint>
+
+    <!-- manufacturer 'base' frame (shoulder height) -->
+    <link name="${prefix}base"/>
+    <joint name="${prefix}base_link-base" type="fixed">
+      <origin xyz="0 0 0.330" rpy="0 0 0"/>
+      <parent link="${prefix}base_link"/>
+      <child link="${prefix}base"/>
+    </joint>
+
+  </xacro:macro>
+</robot>

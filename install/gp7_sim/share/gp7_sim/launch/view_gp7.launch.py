@@ -1,0 +1,1 @@
+/home/buddhi-rashmika/gp7_ws/src/gp7_sim/launch/view_gp7.launch.py

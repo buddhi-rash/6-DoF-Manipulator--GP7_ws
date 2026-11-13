@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<!--
+  Simplified parallel gripper (the CAD model has no end effector).
+  Frame convention: +X of the parent frame (flange) is the tool axis, fingers open/close along Y.
+  Fingertip is 0.14 m from the flange. Open gap = 80 mm, closed on a 50 mm box when each finger
+  has moved ~15 mm inward.
+-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <material name="gripper_grey"><color rgba="0.35 0.35 0.38 1.0"/></material>
+  <material name="gripper_black"><color rgba="0.05 0.05 0.05 1.0"/></material>
+
+  <xacro:macro name="gp7_gripper" params="parent">
+
+    <link name="gripper_base">
+      <visual>
+        <origin xyz="0.02 0 0" rpy="0 0 0"/>
+        <geometry><box size="0.04 0.10 0.05"/></geometry>
+        <material name="gripper_grey"/>
+      </visual>
+      <collision>
+        <origin xyz="0.02 0 0" rpy="0 0 0"/>
+        <geometry><box size="0.04 0.10 0.05"/></geometry>
+      </collision>
+      <inertial>
+        <origin xyz="0.02 0 0" rpy="0 0 0"/>
+        <mass value="0.4"/>
+        <inertia ixx="4.1667e-4" ixy="0" ixz="0" iyy="1.3667e-4" iyz="0" izz="3.8667e-4"/>
+      </inertial>
+    </link>
+    <joint name="flange_to_gripper" type="fixed">
+      <parent link="${parent}"/>
+      <child link="gripper_base"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
+
+    <!-- finger: link frame sits on the joint; the box is offset along +X (towards the fingertip) -->
+    <xacro:macro name="gp7_finger" params="side y_pos axis_y">
+      <link name="finger_${side}">
+        <visual>
+          <origin xyz="0.09 0 0" rpy="0 0 0"/>
+          <geometry><box size="0.10 0.012 0.03"/></geometry>
+          <material name="gripper_black"/>
+        </visual>
+        <collision>
+          <origin xyz="0.09 0 0" rpy="0 0 0"/>
+          <geometry><box size="0.10 0.012 0.03"/></geometry>
+        </collision>
+        <inertial>
+          <origin xyz="0.09 0 0" rpy="0 0 0"/>
+          <mass value="0.05"/>
+          <inertia ixx="4.35e-6" ixy="0" ixz="0" iyy="4.5417e-5" iyz="0" izz="4.2267e-5"/>
+        </inertial>
+      </link>
+      <joint name="finger_${side}_joint" type="prismatic">
+        <parent link="gripper_base"/>
+        <child link="finger_${side}"/>
+        <origin xyz="0 ${y_pos} 0" rpy="0 0 0"/>
+        <axis xyz="0 ${axis_y} 0"/>   <!-- positive travel = towards the centre line -->
+        <limit lower="0.0" upper="0.02" effort="60" velocity="0.2"/>
+      </joint>
+      <!-- friction so a 5 cm box does not slip (read by the URDF->SDF converter) -->
+      <gazebo reference="finger_${side}">
+        <mu1>1.5</mu1>
+        <mu2>1.5</mu2>
+      </gazebo>
+    </xacro:macro>
+
+    <xacro:gp7_finger side="left"  y_pos="0.046"  axis_y="-1"/>
+    <xacro:gp7_finger side="right" y_pos="-0.046" axis_y="1"/>
+
+  </xacro:macro>
+</robot>
