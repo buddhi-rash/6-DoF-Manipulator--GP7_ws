@@ -47,10 +47,17 @@ def sample_box_b(ax, ay, seed):
     raise RuntimeError('could not find a free spot for Box B')
 
 
-def spawner(name):
+def spawner(name, param_file=None):
+    # ROS 2 Lyrical: the controller_manager reads the controller YAML, but the controller nodes
+    # do NOT inherit those parameters, so a trajectory controller starts with an empty `joints`
+    # list and fails with "Failed loading controller". --param-file hands the YAML to the
+    # controller node before it is configured.
+    args = [name, '--controller-manager', '/controller_manager',
+            '--controller-manager-timeout', '60']
+    if param_file:
+        args += ['--param-file', param_file]
     return Node(package='controller_manager', executable='spawner', output='screen',
-                arguments=[name, '--controller-manager', '/controller_manager',
-                           '--controller-manager-timeout', '60'])
+                arguments=args)
 
 
 def launch_setup(context, *args, **kwargs):
@@ -110,8 +117,10 @@ def launch_setup(context, *args, **kwargs):
     spawn_b = create('box_b', ['-file', os.path.join(pkg, 'models', 'box_b.sdf'),
                                '-x', str(bx), '-y', str(by), '-z', '0.026', '-Y', str(byaw)])
 
-    jsb, arm, grip = (spawner('joint_state_broadcaster'), spawner('arm_controller'),
-                      spawner('gripper_controller'))
+    controllers_yaml = os.path.join(pkg, 'config', 'gp7_controllers.yaml')
+    jsb = spawner('joint_state_broadcaster')
+    arm = spawner('arm_controller', controllers_yaml)
+    grip = spawner('gripper_controller', controllers_yaml)
 
     chain = [
         RegisterEventHandler(OnProcessExit(target_action=spawn_robot,
