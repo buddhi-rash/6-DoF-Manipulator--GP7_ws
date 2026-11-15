@@ -107,6 +107,12 @@ def launch_setup(context, *args, **kwargs):
     clock_bridge = Node(package='ros_gz_bridge', executable='parameter_bridge', output='screen',
                         arguments=['/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock'])
 
+    entity_state_bridge = Node(
+    package='ros_gz_bridge', executable='parameter_bridge', output='screen',
+    arguments=['/world/pick_place/get_entity_state'
+               '@ros_gz_interfaces/srv/GetEntityState'
+               '[gz.msgs.Entity'])
+    
     def create(name, extra):
         return Node(package='ros_gz_sim', executable='create', output='screen',
                     arguments=['-world', 'pick_place', '-name', name] + extra)
@@ -128,7 +134,7 @@ def launch_setup(context, *args, **kwargs):
         RegisterEventHandler(OnProcessExit(target_action=jsb, on_exit=[arm])),
         RegisterEventHandler(OnProcessExit(target_action=arm, on_exit=[grip])),
     ]
-    return msgs + env + [rsp, gz, clock_bridge, spawn_robot] + chain
+    return msgs + env + [rsp, gz, clock_bridge, entity_state_bridge, spawn_robot] + chain
 
 
 def generate_launch_description():

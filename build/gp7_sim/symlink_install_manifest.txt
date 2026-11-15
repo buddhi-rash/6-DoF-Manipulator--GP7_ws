@@ -24,6 +24,13 @@
 /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/gp7_sim/models/box_b.sdf
 /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/gp7_sim/rviz/view_gp7.rviz
 /home/buddhi-rashmika/gp7_ws/install/gp7_sim/lib/gp7_sim/move_test.py
+/home/buddhi-rashmika/gp7_ws/install/gp7_sim/lib/gp7_sim/pick_place.py
+/home/buddhi-rashmika/gp7_ws/install/gp7_sim/lib/gp7_sim/plot_traj.py
+/home/buddhi-rashmika/gp7_ws/install/gp7_sim/lib/gp7_sim/validate_ik.py
+/home/buddhi-rashmika/gp7_ws/install/gp7_sim/lib/gp7_sim/gp7_ik_kdl.py
+/home/buddhi-rashmika/gp7_ws/install/gp7_sim/lib/gp7_sim/gp7_ik_analytical.py
+/home/buddhi-rashmika/gp7_ws/install/gp7_sim/lib/gp7_sim/ik_backend.py
+/home/buddhi-rashmika/gp7_ws/install/gp7_sim/lib/gp7_sim/cartesian_planner.py
 /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/ament_index/resource_index/package_run_dependencies/gp7_sim
 /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/ament_index/resource_index/parent_prefix_path/gp7_sim
 /home/buddhi-rashmika/gp7_ws/install/gp7_sim/share/gp7_sim/environment/ament_prefix_path.sh

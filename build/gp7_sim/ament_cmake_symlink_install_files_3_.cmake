@@ -1,1 +1,1 @@
-ament_cmake_symlink_install_files("/home/buddhi-rashmika/gp7_ws/src/gp7_sim" FILES "/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_environment_hooks/ament_prefix_path.dsv" "DESTINATION" "share/gp7_sim/environment")
+ament_cmake_symlink_install_files("/home/buddhi-rashmika/gp7_ws/src/gp7_sim" FILES "/opt/ros/lyrical/share/ament_cmake_core/cmake/environment_hooks/environment/ament_prefix_path.sh" "DESTINATION" "share/gp7_sim/environment")

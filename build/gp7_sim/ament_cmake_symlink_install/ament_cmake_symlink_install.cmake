@@ -325,47 +325,53 @@ ament_cmake_symlink_install_directory("/home/buddhi-rashmika/gp7_ws/src/gp7_sim"
 # install(PROGRAMS "scripts/move_test.py" "DESTINATION" "lib/gp7_sim")
 ament_cmake_symlink_install_programs("/home/buddhi-rashmika/gp7_ws/src/gp7_sim" PROGRAMS "scripts/move_test.py" "DESTINATION" "lib/gp7_sim")
 
-# install(FILES "/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_index/share/ament_index/resource_index/package_run_dependencies/gp7_sim" "DESTINATION" "share/ament_index/resource_index/package_run_dependencies")
+# install(PROGRAMS "scripts/pick_place.py" "scripts/plot_traj.py" "scripts/validate_ik.py" "DESTINATION" "lib/gp7_sim")
+ament_cmake_symlink_install_programs("/home/buddhi-rashmika/gp7_ws/src/gp7_sim" PROGRAMS "scripts/pick_place.py" "scripts/plot_traj.py" "scripts/validate_ik.py" "DESTINATION" "lib/gp7_sim")
+
+# install(FILES "scripts/gp7_ik_kdl.py" "scripts/gp7_ik_analytical.py" "scripts/ik_backend.py" "scripts/cartesian_planner.py" "DESTINATION" "lib/gp7_sim")
 include("/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_symlink_install_files_0_${CMAKE_INSTALL_CONFIG_NAME}.cmake")
 
-# install(FILES "/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_index/share/ament_index/resource_index/parent_prefix_path/gp7_sim" "DESTINATION" "share/ament_index/resource_index/parent_prefix_path")
+# install(FILES "/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_index/share/ament_index/resource_index/package_run_dependencies/gp7_sim" "DESTINATION" "share/ament_index/resource_index/package_run_dependencies")
 include("/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_symlink_install_files_1_${CMAKE_INSTALL_CONFIG_NAME}.cmake")
 
-# install(FILES "/opt/ros/lyrical/share/ament_cmake_core/cmake/environment_hooks/environment/ament_prefix_path.sh" "DESTINATION" "share/gp7_sim/environment")
+# install(FILES "/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_index/share/ament_index/resource_index/parent_prefix_path/gp7_sim" "DESTINATION" "share/ament_index/resource_index/parent_prefix_path")
 include("/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_symlink_install_files_2_${CMAKE_INSTALL_CONFIG_NAME}.cmake")
 
-# install(FILES "/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_environment_hooks/ament_prefix_path.dsv" "DESTINATION" "share/gp7_sim/environment")
+# install(FILES "/opt/ros/lyrical/share/ament_cmake_core/cmake/environment_hooks/environment/ament_prefix_path.sh" "DESTINATION" "share/gp7_sim/environment")
 include("/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_symlink_install_files_3_${CMAKE_INSTALL_CONFIG_NAME}.cmake")
 
-# install(FILES "/opt/ros/lyrical/share/ament_cmake_core/cmake/environment_hooks/environment/path.sh" "DESTINATION" "share/gp7_sim/environment")
+# install(FILES "/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_environment_hooks/ament_prefix_path.dsv" "DESTINATION" "share/gp7_sim/environment")
 include("/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_symlink_install_files_4_${CMAKE_INSTALL_CONFIG_NAME}.cmake")
 
-# install(FILES "/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_environment_hooks/path.dsv" "DESTINATION" "share/gp7_sim/environment")
+# install(FILES "/opt/ros/lyrical/share/ament_cmake_core/cmake/environment_hooks/environment/path.sh" "DESTINATION" "share/gp7_sim/environment")
 include("/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_symlink_install_files_5_${CMAKE_INSTALL_CONFIG_NAME}.cmake")
 
-# install(FILES "/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_environment_hooks/local_setup.bash" "DESTINATION" "share/gp7_sim")
+# install(FILES "/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_environment_hooks/path.dsv" "DESTINATION" "share/gp7_sim/environment")
 include("/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_symlink_install_files_6_${CMAKE_INSTALL_CONFIG_NAME}.cmake")
 
-# install(FILES "/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_environment_hooks/local_setup.fish" "DESTINATION" "share/gp7_sim")
+# install(FILES "/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_environment_hooks/local_setup.bash" "DESTINATION" "share/gp7_sim")
 include("/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_symlink_install_files_7_${CMAKE_INSTALL_CONFIG_NAME}.cmake")
 
-# install(FILES "/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_environment_hooks/local_setup.sh" "DESTINATION" "share/gp7_sim")
+# install(FILES "/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_environment_hooks/local_setup.fish" "DESTINATION" "share/gp7_sim")
 include("/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_symlink_install_files_8_${CMAKE_INSTALL_CONFIG_NAME}.cmake")
 
-# install(FILES "/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_environment_hooks/local_setup.zsh" "DESTINATION" "share/gp7_sim")
+# install(FILES "/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_environment_hooks/local_setup.sh" "DESTINATION" "share/gp7_sim")
 include("/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_symlink_install_files_9_${CMAKE_INSTALL_CONFIG_NAME}.cmake")
 
-# install(FILES "/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_environment_hooks/local_setup.dsv" "DESTINATION" "share/gp7_sim")
+# install(FILES "/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_environment_hooks/local_setup.zsh" "DESTINATION" "share/gp7_sim")
 include("/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_symlink_install_files_10_${CMAKE_INSTALL_CONFIG_NAME}.cmake")
 
-# install(FILES "/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_environment_hooks/package.dsv" "DESTINATION" "share/gp7_sim")
+# install(FILES "/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_environment_hooks/local_setup.dsv" "DESTINATION" "share/gp7_sim")
 include("/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_symlink_install_files_11_${CMAKE_INSTALL_CONFIG_NAME}.cmake")
 
-# install(FILES "/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_index/share/ament_index/resource_index/packages/gp7_sim" "DESTINATION" "share/ament_index/resource_index/packages")
+# install(FILES "/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_environment_hooks/package.dsv" "DESTINATION" "share/gp7_sim")
 include("/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_symlink_install_files_12_${CMAKE_INSTALL_CONFIG_NAME}.cmake")
 
-# install(FILES "/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_core/gp7_simConfig.cmake" "/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_core/gp7_simConfig-version.cmake" "DESTINATION" "share/gp7_sim/cmake")
+# install(FILES "/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_index/share/ament_index/resource_index/packages/gp7_sim" "DESTINATION" "share/ament_index/resource_index/packages")
 include("/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_symlink_install_files_13_${CMAKE_INSTALL_CONFIG_NAME}.cmake")
 
-# install(FILES "/home/buddhi-rashmika/gp7_ws/src/gp7_sim/package.xml" "DESTINATION" "share/gp7_sim")
+# install(FILES "/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_core/gp7_simConfig.cmake" "/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_core/gp7_simConfig-version.cmake" "DESTINATION" "share/gp7_sim/cmake")
 include("/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_symlink_install_files_14_${CMAKE_INSTALL_CONFIG_NAME}.cmake")
+
+# install(FILES "/home/buddhi-rashmika/gp7_ws/src/gp7_sim/package.xml" "DESTINATION" "share/gp7_sim")
+include("/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_symlink_install_files_15_${CMAKE_INSTALL_CONFIG_NAME}.cmake")

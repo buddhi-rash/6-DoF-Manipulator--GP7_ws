@@ -1,1 +1,1 @@
-ament_cmake_symlink_install_files("/home/buddhi-rashmika/gp7_ws/src/gp7_sim" FILES "/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_index/share/ament_index/resource_index/package_run_dependencies/gp7_sim" "DESTINATION" "share/ament_index/resource_index/package_run_dependencies")
+ament_cmake_symlink_install_files("/home/buddhi-rashmika/gp7_ws/src/gp7_sim" FILES "scripts/gp7_ik_kdl.py" "scripts/gp7_ik_analytical.py" "scripts/ik_backend.py" "scripts/cartesian_planner.py" "DESTINATION" "lib/gp7_sim")

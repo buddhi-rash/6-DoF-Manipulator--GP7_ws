@@ -1,1 +1,1 @@
-ament_cmake_symlink_install_files("/home/buddhi-rashmika/gp7_ws/src/gp7_sim" FILES "/home/buddhi-rashmika/gp7_ws/src/gp7_sim/package.xml" "DESTINATION" "share/gp7_sim")
+ament_cmake_symlink_install_files("/home/buddhi-rashmika/gp7_ws/src/gp7_sim" FILES "/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_core/gp7_simConfig.cmake" "/home/buddhi-rashmika/gp7_ws/build/gp7_sim/ament_cmake_core/gp7_simConfig-version.cmake" "DESTINATION" "share/gp7_sim/cmake")

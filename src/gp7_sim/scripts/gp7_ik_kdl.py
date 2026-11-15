@@ -1,3 +1,5 @@
+
+
 #!/usr/bin/env python3
 """
 KDL-based IK backend for GP7.
@@ -12,14 +14,29 @@ from kdl_parser_py.urdf import treeFromFile
 
 
 def _ensure_urdf_file(path: str) -> str:
+    """Expand xacro and strip <ros2_control> blocks (not standard URDF)."""
+    import re
+    import xml.etree.ElementTree as ET
+
     if path.endswith(".xacro"):
         urdf_str = subprocess.check_output(["xacro", path]).decode()
+        # Strip Gazebo-specific tags KDL chokes on
+        urdf_str = re.sub(r"<ros2_control[\s\S]*?</ros2_control>", "", urdf_str)
+        urdf_str = re.sub(r"<gazebo[\s\S]*?</gazebo>", "", urdf_str)
         tmp = tempfile.NamedTemporaryFile(suffix=".urdf", delete=False, mode="w")
         tmp.write(urdf_str)
         tmp.close()
-        return tmp.name
-    return path
+        tmp_path = tmp.name
+    else:
+        tmp_path = path
 
+    # Collect fixed joint names so we can filter them out of the chain later
+    tree = ET.parse(tmp_path)
+    fixed = {j.get("name") for j in tree.getroot().findall("joint")
+             if j.get("type") == "fixed"}
+    # Attach to module scope so __init__ can read it
+    _ensure_urdf_file.last_fixed_joints = fixed
+    return tmp_path
 
 def _numpy_to_kdl(R, p):
     return kdl.Frame(
@@ -52,18 +69,29 @@ class GP7IK:
                 f"Expected 6 joints, got {self.chain.getNrOfJoints()}"
             )
         self.n = self.chain.getNrOfJoints()
-        self.joint_names = [
-            self.chain.getSegment(i).getJoint().getName()
-            for i in range(self.chain.getNrOfSegments())
-            if self.chain.getSegment(i).getJoint().getType() != kdl.Joint.None
-        ]
+                # Filter out fixed joints by name — robust across PyKDL versions
+        fixed_joint_names = getattr(_ensure_urdf_file, "last_fixed_joints", set())
+        self.joint_names = []
+        for i in range(self.chain.getNrOfSegments()):
+            name = self.chain.getSegment(i).getJoint().getName()
+            if name and name not in fixed_joint_names:
+                self.joint_names.append(name)
 
+        assert len(self.joint_names) == self.n, (
+            f"Joint count mismatch: chain has {self.n} joints "
+            f"but found {len(self.joint_names)} names: {self.joint_names} "
+            f"(fixed joints filtered: {sorted(fixed_joint_names)})"
+        )
         self.tool_offset = tool_offset
         self.fk_solver = kdl.ChainFkSolverPos_recursive(self.chain)
         self.ik_vel = kdl.ChainIkSolverVel_pinv(self.chain, 1e-6, 200)
-        self.ik_pos = kdl.ChainIkSolverPos_NR(
-            self.chain, self.fk_solver, self.ik_vel, 500, 1e-6
-        )
+        try:
+            # LMA is much smoother and prevents wrist oscillations
+            self.ik_pos = kdl.ChainIkSolverPos_LMA(self.chain, 1e-6, 500)
+        except AttributeError:
+            self.ik_pos = kdl.ChainIkSolverPos_NR(
+                self.chain, self.fk_solver, self.ik_vel, 500, 1e-6
+            )
 
     def _fk_flange(self, q):
         q_kdl = kdl.JntArray(self.n)

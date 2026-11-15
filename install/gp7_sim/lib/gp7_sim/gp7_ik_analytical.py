@@ -1,0 +1,1 @@
+/home/buddhi-rashmika/gp7_ws/src/gp7_sim/scripts/gp7_ik_analytical.py
