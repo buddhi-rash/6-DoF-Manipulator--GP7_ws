@@ -18,9 +18,10 @@
         <geometry><box size="0.04 0.10 0.05"/></geometry>
         <material name="gripper_grey"/>
       </visual>
+      <!-- collision box is 10 mm shorter than the visual so it never touches the fingers (they start at x = 0.04) -->
       <collision>
-        <origin xyz="0.02 0 0" rpy="0 0 0"/>
-        <geometry><box size="0.04 0.10 0.05"/></geometry>
+        <origin xyz="0.015 0 0" rpy="0 0 0"/>
+        <geometry><box size="0.03 0.10 0.05"/></geometry>
       </collision>
       <inertial>
         <origin xyz="0.02 0 0" rpy="0 0 0"/>
@@ -34,30 +35,37 @@
       <origin xyz="0 0 0" rpy="0 0 0"/>
     </joint>
 
-    <!-- finger: link frame sits on the joint; the box is offset along +X (towards the fingertip) -->
-    <xacro:macro name="gp7_finger" params="side y_pos axis_y">
+    <!-- Finger. BOTH fingers use the identical joint definition (axis 0 -1 0 in the joint frame,
+         limits 0..0.02, positive = closing). The right finger is mounted with yaw = pi, so its
+         -Y axis points to +Y in the gripper frame. Because the joint frame is turned around,
+         the finger box sits at x = -0.09 in its own frame (= +0.09 in the gripper frame).
+         Finger mass 0.2 kg and effort 20 N keep the contact solver well conditioned. -->
+    <xacro:macro name="gp7_finger" params="side y_pos yaw gx">
       <link name="finger_${side}">
         <visual>
-          <origin xyz="0.09 0 0" rpy="0 0 0"/>
+          <origin xyz="${gx} 0 0" rpy="0 0 0"/>
           <geometry><box size="0.10 0.012 0.03"/></geometry>
           <material name="gripper_black"/>
         </visual>
         <collision>
-          <origin xyz="0.09 0 0" rpy="0 0 0"/>
+          <origin xyz="${gx} 0 0" rpy="0 0 0"/>
           <geometry><box size="0.10 0.012 0.03"/></geometry>
         </collision>
         <inertial>
-          <origin xyz="0.09 0 0" rpy="0 0 0"/>
-          <mass value="0.05"/>
-          <inertia ixx="4.35e-6" ixy="0" ixz="0" iyy="4.5417e-5" iyz="0" izz="4.2267e-5"/>
+          <origin xyz="${gx} 0 0" rpy="0 0 0"/>
+          <mass value="0.2"/>
+          <inertia ixx="1.74e-5" ixy="0" ixz="0" iyy="1.8167e-4" iyz="0" izz="1.6907e-4"/>
         </inertial>
       </link>
       <joint name="finger_${side}_joint" type="prismatic">
         <parent link="gripper_base"/>
         <child link="finger_${side}"/>
-        <origin xyz="0 ${y_pos} 0" rpy="0 0 0"/>
-        <axis xyz="0 ${axis_y} 0"/>   <!-- positive travel = towards the centre line -->
-        <limit lower="0.0" upper="0.02" effort="60" velocity="0.2"/>
+        <origin xyz="0 ${y_pos} 0" rpy="0 0 ${yaw}"/>
+        <axis xyz="0 -1 0"/>   <!-- positive travel = towards the centre line, for both fingers -->
+        <!-- Working range is 0 (open) .. 0.02 (closed). The limits are deliberately a little WIDER than
+             that: Gazebo's physics engine (DART) can pin a joint that sits exactly on a limit, which
+             left one finger stuck. Never command outside 0 .. 0.02. -->
+        <limit lower="-0.005" upper="0.025" effort="20" velocity="0.2"/>
       </joint>
       <!-- friction so a 5 cm box does not slip (read by the URDF->SDF converter) -->
       <gazebo reference="finger_${side}">
@@ -66,8 +74,8 @@
       </gazebo>
     </xacro:macro>
 
-    <xacro:gp7_finger side="left"  y_pos="0.046"  axis_y="-1"/>
-    <xacro:gp7_finger side="right" y_pos="-0.046" axis_y="1"/>
+    <xacro:gp7_finger side="left"  y_pos="0.046"  yaw="0"          gx="0.09"/>
+    <xacro:gp7_finger side="right" y_pos="-0.046" yaw="${pi}"      gx="-0.09"/>
 
   </xacro:macro>
 </robot>

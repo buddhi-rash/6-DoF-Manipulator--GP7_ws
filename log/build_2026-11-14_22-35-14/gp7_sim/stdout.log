@@ -12,7 +12,7 @@
 -- Detecting CXX compile features - done
 -- Found ament_cmake: 2.8.8 (/opt/ros/lyrical/share/ament_cmake/cmake)
 -- Override CMake install command with custom implementation using symlinks instead of copying resources
--- Configuring done (1.0s)
+-- Configuring done (0.8s)
 -- Generating done (0.0s)
 -- Build files have been written to: /home/buddhi-rashmika/gp7_ws/build/gp7_sim
 -- Install configuration: ""
