@@ -83,6 +83,7 @@ class PickPlace(Node):
 
         self.current_q = None
         self.log_rows = []
+        self.plan_time = 0.0   # <--- ADD THIS LINE
 
     def _joint_state_cb(self, msg):
         q = np.zeros(len(self.joint_names))
@@ -218,12 +219,15 @@ class PickPlace(Node):
 
     def _log_segment(self, label, q_list, qd_list, qdd_list):
         for i in range(len(q_list)):
-            row = {"segment": label, "t": i * DT}
+            # Use cumulative time
+            row = {"segment": label, "t": self.plan_time + i * DT}
             for j in range(6):
                 row[f"q{j}"] = float(q_list[i][j])
                 row[f"qd{j}"] = float(qd_list[i][j])
                 row[f"qdd{j}"] = float(qdd_list[i][j])
             self.log_rows.append(row)
+        # Advance the global time by the duration of this segment
+        self.plan_time += len(q_list) * DT
 
     def _write_csv(self):
         if not self.log_rows:
