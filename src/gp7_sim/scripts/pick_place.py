@@ -2,9 +2,8 @@
 """
 GP7 pick-and-place for Gazebo Jetty / ROS 2 Lyrical.
 
-- Six straight-line Cartesian segments
+- Six straight-line Cartesian segments with proper trapezoidal velocity spacing
 - Constant tool-down orientation — Box B stays upright throughout
-- Trapezoidal velocity profile scaled to joint limits
 - Box A and Box B poses read live from Gazebo via `gz model --pose` CLI
 - Dynamic pre-pose to prevent IK branch folding
 - Position-only trajectories with 5-point moving average smoothing
@@ -44,8 +43,9 @@ GRIPPER_CLOSE  = [0.022, 0.022]   # Squeezes the box firmly
 
 JOINT_VEL_LIMITS = np.array([3.14] * 6)
 
-V_MAX_PATH = 0.10
-A_MAX_PATH = 0.20
+# Increased speeds for smoother, faster motion
+V_MAX_PATH = 0.20
+A_MAX_PATH = 0.40
 DT         = 0.01
 
 APPROACH_H = 0.12
@@ -139,11 +139,24 @@ class PickPlace(Node):
 
     def _cartesian_segment(self, label, start_xyz, end_xyz, q_seed,
                            R_fixed, v_scale=1.0):
-        length = np.linalg.norm(np.asarray(end_xyz) - np.asarray(start_xyz))
-        _, s, _, _ = cp.trapezoidal_profile(
+        start_xyz = np.asarray(start_xyz)
+        end_xyz = np.asarray(end_xyz)
+        length = np.linalg.norm(end_xyz - start_xyz)
+        
+        # Calculate trapezoidal profile: returns time, distance(s), velocity, accel
+        t, s, s_dot, s_ddot = cp.trapezoidal_profile(
             length, V_MAX_PATH * v_scale, A_MAX_PATH * v_scale, DT)
+        
         n = len(s)
-        positions = cp.straight_line(start_xyz, end_xyz, n)
+        if n == 0:
+            return [], [], [], q_seed
+
+        # Generate positions using the 's' array for proper acceleration/deceleration
+        positions = []
+        for si in s:
+            alpha = si / length if length > 1e-9 else 0.0
+            pos = start_xyz + alpha * (end_xyz - start_xyz)
+            positions.append(pos)
 
         q_list, qd_list, qdd_list = [], [], []
         q_prev = q_seed.copy()
