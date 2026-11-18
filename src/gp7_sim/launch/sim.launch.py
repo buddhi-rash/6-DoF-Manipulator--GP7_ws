@@ -4,10 +4,8 @@
     ros2 launch gp7_sim sim.launch.py
 
 Arguments (all optional):
-    box_a_x, box_a_y   Box A centre (m).  Default 0.55 0.45  (reachable; see README)
-                       The task sheet says (1.0, 1.0) - that is 1.41 m from the base and the
-                       GP7 only reaches ~0.9 m, so use it only to reproduce the scene:
-                       ros2 launch gp7_sim sim.launch.py box_a_x:=1.0 box_a_y:=1.0
+    box_a_x, box_a_y   Box A centre (m).  Default 0.5 0.5  (reachable; see README)
+                       
     box_b_x, box_b_y   Box B centre (m) or 'random' (default) -> random reachable spot
     box_b_yaw          Box B yaw in rad (default 'random')
     seed               integer for a repeatable random Box B, or 'none'
@@ -30,8 +28,9 @@ from launch_ros.parameter_descriptions import ParameterValue
 
 # Top-down grasp annulus around the base axis. A numerical IK sweep over the GP7 kinematics
 # (joint limits respected, collisions ignored) gives ~0.23-0.90 m; we keep a safety margin.
-R_MIN, R_MAX = 0.35, 0.75
-MAX_THETA = math.radians(150)      # stay away from the J1 limit (+-170 deg)
+# Top-down grasp annulus around the base axis...
+R_MIN, R_MAX = 0.40, 0.70
+MAX_THETA = math.radians(120)      # stay away from the J1 limit (+-170 deg)
 BOX_A_HALF, BOX_B_HALF, CLEARANCE = 0.15, 0.025, 0.10
 
 
@@ -139,8 +138,8 @@ def launch_setup(context, *args, **kwargs):
 
 def generate_launch_description():
     return LaunchDescription([
-        DeclareLaunchArgument('box_a_x', default_value='0.55'),
-        DeclareLaunchArgument('box_a_y', default_value='0.45'),
+        DeclareLaunchArgument('box_a_x', default_value='0.5'),
+        DeclareLaunchArgument('box_a_y', default_value='0.5'),
         DeclareLaunchArgument('box_b_x', default_value='random'),
         DeclareLaunchArgument('box_b_y', default_value='random'),
         DeclareLaunchArgument('box_b_yaw', default_value='random'),

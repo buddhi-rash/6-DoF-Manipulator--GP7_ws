@@ -1,12 +1,7 @@
 #!/usr/bin/env python3
 """
 GP7 pick-and-place for Gazebo Jetty / ROS 2 Lyrical.
-
-- Six straight-line Cartesian segments with proper trapezoidal velocity spacing
-- Constant tool-down orientation — Box B stays upright throughout
-- Box A and Box B poses read live from Gazebo via `gz model --pose` CLI
-- Dynamic pre-pose to prevent IK branch folding
-- Position-only trajectories with 5-point moving average smoothing
+Features continuous multi-segment motion (no unnecessary stops) and via-point singularity avoidance.
 """
 import os
 import sys
@@ -39,29 +34,21 @@ TOOL_OFFSET = 0.14
 
 GRIPPER_JOINTS = ["finger_left_joint", "finger_right_joint"]
 GRIPPER_OPEN   = [0.0,   0.0]
-GRIPPER_CLOSE  = [0.022, 0.022]   # Squeezes the box firmly
+GRIPPER_CLOSE  = [0.020, 0.020]
 
 JOINT_VEL_LIMITS = np.array([3.14] * 6)
 
-# Increased speeds for smoother, faster motion
-V_MAX_PATH = 0.20
-A_MAX_PATH = 0.40
+V_MAX_PATH = 0.45     # Increased speed for smoother cruise
+A_MAX_PATH = 0.60
 DT         = 0.01
 
 APPROACH_H = 0.12
-LIFT_H     = 0.15
+LIFT_H     = 0.25
 PLACE_DROP = 0.005
 
 BOX_A_HEIGHT = 0.20
 BOX_B_HALF   = 0.025
 # ---------------------------------------------------
-
-
-def _quat_to_yaw(q):
-    siny_cosp = 2.0 * (q.w * q.z + q.x * q.y)
-    cosy_cosp = 1.0 - 2.0 * (q.y * q.y + q.z * q.z)
-    return math.atan2(siny_cosp, cosy_cosp)
-
 
 class PickPlace(Node):
     def __init__(self):
@@ -83,7 +70,7 @@ class PickPlace(Node):
 
         self.current_q = None
         self.log_rows = []
-        self.plan_time = 0.0   # <--- ADD THIS LINE
+        self.plan_time = 0.0
 
     def _joint_state_cb(self, msg):
         q = np.zeros(len(self.joint_names))
@@ -138,58 +125,89 @@ class PickPlace(Node):
         qdd_list = np.gradient(qd_list, DT, axis=0)
         return q_list.tolist(), qd_list.tolist(), qdd_list.tolist()
 
-    def _cartesian_segment(self, label, start_xyz, end_xyz, q_seed,
-                           R_fixed, v_scale=1.0):
-        start_xyz = np.asarray(start_xyz)
-        end_xyz = np.asarray(end_xyz)
-        length = np.linalg.norm(end_xyz - start_xyz)
+    def _plan_continuous_path(self, label, waypoints, q_seed, R_fixed, v_scale=1.0):
+        """Plans a smooth, continuous trajectory through multiple Cartesian waypoints."""
+        waypoints = [np.asarray(w) for w in waypoints]
         
-        # Calculate trapezoidal profile: returns time, distance(s), velocity, accel
-        t, s, s_dot, s_ddot = cp.trapezoidal_profile(
-            length, V_MAX_PATH * v_scale, A_MAX_PATH * v_scale, DT)
+        # 1. Calculate distances between waypoints
+        distances = [0.0]
+        for i in range(len(waypoints) - 1):
+            d = np.linalg.norm(waypoints[i+1] - waypoints[i])
+            distances.append(distances[-1] + d)
+        total_length = distances[-1]
         
-        n = len(s)
-        if n == 0:
+        if total_length < 1e-6:
             return [], [], [], q_seed
+            
+        # 2. Generate a SINGLE trapezoidal profile for the entire multi-segment path
+        _, s, _, _ = cp.trapezoidal_profile(
+            total_length, V_MAX_PATH * v_scale, A_MAX_PATH * v_scale, DT)
+        n = len(s)
 
-        # Generate positions using the 's' array for proper acceleration/deceleration
+        # 3. Interpolate Cartesian positions based on the 's' distance array
         positions = []
         for si in s:
-            alpha = si / length if length > 1e-9 else 0.0
-            pos = start_xyz + alpha * (end_xyz - start_xyz)
-            positions.append(pos)
+            for i in range(len(waypoints) - 1):
+                if si <= distances[i+1] + 1e-9:
+                    seg_len = distances[i+1] - distances[i]
+                    alpha = (si - distances[i]) / seg_len if seg_len > 1e-9 else 0.0
+                    pos = waypoints[i] + alpha * (waypoints[i+1] - waypoints[i])
+                    positions.append(pos)
+                    break
 
+        # 4. Solve IK for the entire path
         q_list, qd_list, qdd_list = [], [], []
         q_prev = q_seed.copy()
         qd_prev = np.zeros(6)
 
         for i, pos in enumerate(positions):
             q_sol = self.ik.ik(pos, R_fixed, q_prev)
+            
+            # Branch Jump Detection
+            if q_sol is not None and i > 0:
+                if np.max(np.abs(q_sol - q_prev)) > 0.6:
+                    q_sol = self.ik.ik(pos, R_fixed, np.zeros(6))
+                    if q_sol is None or np.max(np.abs(q_sol - q_prev)) > 0.6:
+                        raise RuntimeError(f"IK Branch jump detected on '{label}' at sample {i}")
+
             if q_sol is None:
                 raise RuntimeError(
                     f"IK failed on '{label}' sample {i}/{n} pos={pos}")
             q_list.append(q_sol)
+            
             qd = (q_sol - q_prev) / DT if i > 0 else np.zeros(6)
             qdd = (qd - qd_prev) / DT if i > 0 else np.zeros(6)
             qd_list.append(qd)
             qdd_list.append(qdd)
             q_prev, qd_prev = q_sol, qd
 
-        # Apply a 5-point moving average to smooth out IK micro-jitter
-        if len(q_list) > 5:
+        # 5. Unwrap and smooth to round off the sharp corners
+        q_arr = np.array(q_list)
+        for j in range(6):
+            q_arr[:, j] = np.unwrap(q_arr[:, j])
+        q_list = q_arr.tolist()
+
+        # Use a slightly larger moving average (9 points) to smooth the corners nicely
+        if len(q_list) > 9:
             q_arr = np.array(q_list)
             q_smooth = np.copy(q_arr)
-            for i in range(2, len(q_arr) - 2):
-                q_smooth[i] = np.mean(q_arr[i-2:i+3], axis=0)
-            q_smooth[0] = q_arr[0]
-            q_smooth[-1] = q_arr[-1]
+            for i in range(4, len(q_arr) - 4):
+                q_smooth[i] = np.mean(q_arr[i-4:i+5], axis=0)
+            q_smooth[:4] = q_arr[:4]
+            q_smooth[-4:] = q_arr[-4:]
             q_list = q_smooth.tolist()
+
+        # 6. Recompute derivatives from smoothed trajectory
+        q_arr = np.array(q_list)
+        qd_arr = np.gradient(q_arr, DT, axis=0)
+        qdd_arr = np.gradient(qd_arr, DT, axis=0)
+        qd_list = qd_arr.tolist()
+        qdd_list = qdd_arr.tolist()
 
         self._log_segment(label, q_list, qd_list, qdd_list)
         return q_list, qd_list, qdd_list, q_list[-1]
 
     def _send_arm(self, q_list, qd_list, qdd_list):
-        """Publish a position-only trajectory at full 100Hz resolution."""
         msg = JointTrajectory()
         msg.joint_names = self.joint_names
         n = len(q_list)
@@ -219,14 +237,12 @@ class PickPlace(Node):
 
     def _log_segment(self, label, q_list, qd_list, qdd_list):
         for i in range(len(q_list)):
-            # Use cumulative time
             row = {"segment": label, "t": self.plan_time + i * DT}
             for j in range(6):
                 row[f"q{j}"] = float(q_list[i][j])
                 row[f"qd{j}"] = float(qd_list[i][j])
                 row[f"qdd{j}"] = float(qdd_list[i][j])
             self.log_rows.append(row)
-        # Advance the global time by the duration of this segment
         self.plan_time += len(q_list) * DT
 
     def _write_csv(self):
@@ -243,7 +259,6 @@ class PickPlace(Node):
     def run(self):
         self.wait_for_sim()
 
-        # 1. Read Box poses
         box_a_xyz, _ = self._query_entity_pose("box_a")
         box_b_xyz, box_b_yaw = self._query_entity_pose("box_b")
         self.get_logger().info(
@@ -251,25 +266,19 @@ class PickPlace(Node):
             f"yaw {math.degrees(box_b_yaw):.1f} deg"
         )
 
-        # 2. Derive targets
         box_a_top_z = box_a_xyz[2] + BOX_A_HEIGHT / 2.0
-        # Grasp point lowered to 0.010 so fingers wrap around the box
         box_b_grasp = np.array([box_b_xyz[0], box_b_xyz[1], 0.010])
         approach = box_b_grasp + np.array([0, 0, APPROACH_H])
         lift     = box_b_grasp + np.array([0, 0, LIFT_H])
 
         place_target = np.array([
-            box_a_xyz[0],
-            box_a_xyz[1],
-            box_a_top_z + BOX_B_HALF + PLACE_DROP,
+            box_a_xyz[0], box_a_xyz[1], box_a_top_z + BOX_B_HALF + PLACE_DROP
         ])
         transfer = place_target + np.array([0, 0, APPROACH_H])
         retreat  = place_target + np.array([0, 0, LIFT_H])
 
-        # 3. Tool orientation
         R_down = cp.tool_down_R(yaw=box_b_yaw)
 
-        # 4. Dynamic Pre-pose
         theta = math.atan2(box_b_grasp[1], box_b_grasp[0])
         q_start_seed = np.array([theta, 0.0, 0.0, 0.0, -1.57, 0.0])
         p_start_seed, _ = self.ik.fk(q_start_seed)
@@ -284,53 +293,68 @@ class PickPlace(Node):
         q = q_start.copy()
         p_start, _ = self.ik.fk(q)
 
-        # 5. Approach
-        self.get_logger().info("Approaching Box B")
-        qL, qdL, qddL, q = self._cartesian_segment(
-            "approach", p_start, approach, q, R_down)
+        # ========================================================
+        # PHASE 1: PICK (Approach -> Grasp)
+        # ========================================================
+        self.get_logger().info("Phase 1: Approaching and Grasping Box B")
+        qL, qdL, qddL, q = self._plan_continuous_path(
+            "pick", [p_start, approach, box_b_grasp], q, R_down)
         self._send_arm(qL, qdL, qddL)
 
-        # 6. Descend
-        self.get_logger().info("Descending to grasp")
-        qL, qdL, qddL, q = self._cartesian_segment(
-            "grasp", approach, box_b_grasp, q, R_down)
-        self._send_arm(qL, qdL, qddL)
-
-        # 7. Close Gripper
         self.get_logger().info("Closing gripper")
-        self._gripper(GRIPPER_CLOSE, wait=1.2)
+        self._gripper(GRIPPER_CLOSE, wait=1)
 
-        # 8. Lift
-        self.get_logger().info("Lifting")
-        qL, qdL, qddL, q = self._cartesian_segment(
-            "lift", box_b_grasp, lift, q, R_down)
+        # ========================================================
+        # PHASE 2A: FAST TRANSFER (Lift -> Transfer)
+        # ========================================================
+        self.get_logger().info("Phase 2A: Lifting and Transferring (Fast)")
+        path_waypoints = [box_b_grasp, lift]
+        
+        # Via-point singularity avoidance
+        theta_B = math.atan2(lift[1], lift[0])
+        theta_A = math.atan2(transfer[1], transfer[0])
+        angle_diff = (theta_A - theta_B + math.pi) % (2 * math.pi) - math.pi
+        
+        if abs(angle_diff) > math.radians(100):
+            self.get_logger().info("Large swing detected. Routing via safe intermediate point.")
+            theta_mid = theta_B + angle_diff / 2.0
+            r_safe = 0.5
+            via_x = r_safe * math.cos(theta_mid)
+            via_y = r_safe * math.sin(theta_mid)
+            via_z = max(lift[2], transfer[2])
+            path_waypoints.append(np.array([via_x, via_y, via_z]))
+            
+        # Stop at 'transfer' (which is APPROACH_H above Box A)
+        path_waypoints.append(transfer)
+        
+        # Fly at FULL speed (no v_scale)
+        qL, qdL, qddL, q = self._plan_continuous_path(
+            "transfer", path_waypoints, q, R_down)
         self._send_arm(qL, qdL, qddL)
 
-        # 9. Transfer
-        self.get_logger().info("Transferring to Box A")
-        qL, qdL, qddL, q = self._cartesian_segment(
-            "transfer", lift, transfer, q, R_down)
+        # ========================================================
+        # PHASE 2B: SLOW DESCENT (Transfer -> Place)
+        # ========================================================
+        self.get_logger().info("Phase 2B: Descending to place (Slow)")
+        
+        # Descend from the approach height to the drop height at 20% speed
+        qL, qdL, qddL, q = self._plan_continuous_path(
+            "place", [transfer, place_target], q, R_down, v_scale=0.7)
         self._send_arm(qL, qdL, qddL)
 
-        # 10. Place
-        self.get_logger().info("Descending to place")
-        qL, qdL, qddL, q = self._cartesian_segment(
-            "place", transfer, place_target, q, R_down)
-        self._send_arm(qL, qdL, qddL)
-
-        # 11. Open Gripper
         self.get_logger().info("Opening gripper")
-        self._gripper(GRIPPER_OPEN, wait=1.2)
+        self._gripper(GRIPPER_OPEN, wait=1)
 
-        # 12. Retreat
-        self.get_logger().info("Retreating")
-        qL, qdL, qddL, q = self._cartesian_segment(
-            "retreat", place_target, retreat, q, R_down)
+        # ========================================================
+        # PHASE 3: RETREAT (Place -> Retreat)
+        # ========================================================
+        self.get_logger().info("Phase 3: Retreating")
+        qL, qdL, qddL, q = self._plan_continuous_path(
+            "retreat", [place_target, retreat], q, R_down)
         self._send_arm(qL, qdL, qddL)
 
         self._write_csv()
         self.get_logger().info("Pick-and-place complete.")
-
 
 def main():
     rclpy.init()
@@ -343,7 +367,6 @@ def main():
     finally:
         node.destroy_node()
         rclpy.shutdown()
-
 
 if __name__ == "__main__":
     main()
