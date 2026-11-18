@@ -86,7 +86,6 @@ class GP7IK:
         self.fk_solver = kdl.ChainFkSolverPos_recursive(self.chain)
         self.ik_vel = kdl.ChainIkSolverVel_pinv(self.chain, 1e-6, 200)
         try:
-            # LMA is much smoother and prevents wrist oscillations
             self.ik_pos = kdl.ChainIkSolverPos_LMA(self.chain, 1e-6, 500)
         except AttributeError:
             self.ik_pos = kdl.ChainIkSolverPos_NR(
